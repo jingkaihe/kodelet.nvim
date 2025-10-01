@@ -1,15 +1,15 @@
 # kodelet.nvim
 
-A Neovim plugin for deep integration with [Kodelet](https://github.com/jingkaihe/kodelet) - enabling context sharing, code selections, LSP diagnostics, and feedback messaging between Neovim and Kodelet sessions.
+A Neovim plugin for deep integration with [Kodelet](https://github.com/jingkaihe/kodelet) - enabling seamless context sharing, code selections, LSP diagnostics, and feedback messaging between Neovim and Kodelet sessions.
 
 ## Features
 
-- 🔗 **Easy Attachment**: Tab completion to browse and attach to Kodelet conversations
-- 📁 **Context Sharing**: Automatically share open files and project structure
-- 🐛 **Diagnostics Integration**: Share LSP diagnostics (errors, warnings, hints)
-- 📝 **Code Selection**: Send specific code snippets for focused discussion
-- 💬 **Feedback System**: Send messages to running Kodelet sessions
-- 🔄 **Auto-Updates**: Context updates automatically on buffer changes
+- **Easy Attachment** - Tab completion to browse and attach to Kodelet conversations
+- **Context Sharing** - Automatically share open files and project structure
+- **Diagnostics Integration** - Share LSP diagnostics (errors, warnings, hints)
+- **Code Selection** - Send specific code snippets for focused discussion
+- **Feedback System** - Send messages to running Kodelet sessions
+- **Auto-Updates** - Context updates automatically on buffer changes
 
 ## Prerequisites
 
@@ -19,35 +19,49 @@ A Neovim plugin for deep integration with [Kodelet](https://github.com/jingkaihe
 
 ## Installation
 
-### Using [lazy.nvim](https://github.com/folke/lazy.nvim)
+### Using [lazy.nvim](https://github.com/folke/lazy.nvim) (Recommended)
+
+**Basic setup:**
 
 ```lua
 {
   "jingkaihe/kodelet.nvim",
   event = "VeryLazy",
   config = function()
-    require("kodelet").setup()
+    require("kodelet").setup({
+      -- Add any custom configuration here
+    })
   end,
 }
 ```
 
-### With keymappings:
+**With keymappings and which-key integration:**
 
 ```lua
 {
   "jingkaihe/kodelet.nvim",
   event = "VeryLazy",
   keys = {
-    { "<leader>ka", "<cmd>KodeletAttach<cr>", desc = "Kodelet: Attach to conversation" },
-    { "<leader>ks", "<cmd>KodeletAttachSelect<cr>", desc = "Kodelet: Attach with picker" },
-    { "<leader>kf", "<cmd>KodeletFeedback<cr>", desc = "Kodelet: Send feedback" },
-    { "<leader>kd", "<cmd>KodeletDetach<cr>", desc = "Kodelet: Detach" },
-    { "<leader>kc", "<cmd>KodeletClearContext<cr>", desc = "Kodelet: Clear context" },
-    { "<leader>kt", "<cmd>KodeletStatus<cr>", desc = "Kodelet: Show status" },
-    { "<leader>ks", ":'<,'>KodeletSendSelection<cr>", mode = "v", desc = "Kodelet: Send selection" },
+    { "<leader>ka", "<cmd>KodeletAttach<cr>", desc = "Attach to conversation" },
+    { "<leader>kp", "<cmd>KodeletAttachSelect<cr>", desc = "Attach with picker" },
+    { "<leader>kf", "<cmd>KodeletFeedback<cr>", desc = "Send feedback" },
+    { "<leader>kd", "<cmd>KodeletDetach<cr>", desc = "Detach" },
+    { "<leader>kc", "<cmd>KodeletClearContext<cr>", desc = "Clear context" },
+    { "<leader>kx", "<cmd>KodeletClearSelection<cr>", desc = "Clear selection" },
+    { "<leader>kt", "<cmd>KodeletStatus<cr>", desc = "Show status" },
+    -- Visual mode mapping for selection
+    { "<leader>ks", ":'<,'>KodeletSendSelection<cr>", mode = "v", desc = "Send selection" },
   },
+  init = function()
+    -- Optional: Add which-key group
+    require("which-key").add({
+      { "<leader>k", group = "kodelet", icon = "🤖" },
+    })
+  end,
   config = function()
-    require("kodelet").setup()
+    require("kodelet").setup({
+      -- Add any custom configuration here
+    })
   end,
 }
 ```
@@ -75,23 +89,23 @@ EOF
 
 ## Usage
 
-### Basic Workflow
+### Quick Start Workflow
 
-1. **Start Kodelet in terminal**:
+1. **Start Kodelet in your terminal**:
    ```bash
    kodelet chat
    ```
 
 2. **In Neovim, attach to the conversation**:
+   
+   Press `<space>k` to see all kodelet commands, then:
+   - `<space>ka` - Attach to most recent conversation
+   - `<space>kp` - Pick from conversation list
+   
+   Or use commands directly:
    ```vim
-   :KodeletAttach <Tab>
-   " Tab shows: "20241201T120000-a1b2c3d4e5f67890    Refactor authentication module"
-   
-   " Or attach to most recent:
-   :KodeletAttach
-   
-   " Or use interactive picker:
-   :KodeletAttachSelect
+   :KodeletAttach <Tab>  " Tab completion shows available conversations
+   :KodeletAttach        " Attach to most recent
    ```
 
 3. **Context is automatically shared**:
@@ -99,59 +113,78 @@ EOF
    - LSP diagnostics are included
    - Updates on buffer changes (debounced)
 
-4. **Send messages**:
-   ```vim
-   :KodeletFeedback Please refactor this function
-   ```
+4. **Send feedback/messages**:
+   - `<space>kf` - Opens prompt to send message
+   - Or: `:KodeletFeedback Please refactor this function`
 
-5. **Send code selections** (in visual mode):
-   ```vim
-   :'<,'>KodeletSendSelection
-   ```
+5. **Send code selections**:
+   - Select code in visual mode (`V`)
+   - Press `<space>ks` to send selection to Kodelet
 
-### Commands
+### Default Keybindings
 
-- `:KodeletAttach [conversation-id]` - Attach to Kodelet conversation (tab completion available)
-- `:KodeletAttachSelect` - Interactive conversation picker
-- `:KodeletFeedback [message]` - Send feedback/message to Kodelet
-- `:KodeletSendSelection` - Send visual selection to Kodelet (visual mode)
-- `:KodeletStatus` - Show current connection status
-- `:KodeletClearContext` - Manually clear context
-- `:KodeletDetach` - Detach from conversation
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<space>ka` | Normal | Attach to conversation |
+| `<space>kp` | Normal | Attach with picker |
+| `<space>kf` | Normal | Send feedback |
+| `<space>kd` | Normal | Detach from conversation |
+| `<space>kc` | Normal | Clear context |
+| `<space>kx` | Normal | Clear selection |
+| `<space>kt` | Normal | Show status |
+| `<space>ks` | Visual | Send selection |
 
-### Environment Variable Auto-Attach
+### Available Commands
 
-Set `KODELET_CONVERSATION_ID` to auto-attach on Neovim startup:
+| Command | Description |
+|---------|-------------|
+| `:KodeletAttach [conversation-id]` | Attach to Kodelet conversation (tab completion available) |
+| `:KodeletAttachSelect` | Interactive conversation picker |
+| `:KodeletFeedback [message]` | Send feedback/message to Kodelet |
+| `:KodeletSendSelection` | Send visual selection to Kodelet (visual mode) |
+| `:KodeletStatus` | Show current connection status |
+| `:KodeletClearContext` | Manually clear context |
+| `:KodeletClearSelection` | Clear current code selection |
+| `:KodeletDetach` | Detach from conversation |
+
+### Pro Tips
+
+**Auto-attach on startup:**
+
+Set `KODELET_CONVERSATION_ID` environment variable to auto-attach when Neovim starts:
 
 ```bash
 export KODELET_CONVERSATION_ID=20241201T120000-a1b2c3d4e5f67890
 nvim
 ```
 
+**Workflow tip:** Keep Kodelet running in a tmux/terminal split for seamless context sharing!
+
 ## How It Works
 
 The plugin uses file-based communication with Kodelet:
 
-- **IDE Context**: `~/.kodelet/ide/context-{conversation_id}.json`
-  - Contains open files, selections, and diagnostics
-  - Updated automatically on buffer changes
-  - Read and cleared by Kodelet on each turn
+**IDE Context** (`~/.kodelet/ide/context-{conversation_id}.json`):
+- Contains open files, selections, and diagnostics
+- Updated automatically on buffer changes (debounced)
+- Read and cleared by Kodelet on each turn
 
-- **Feedback**: Uses Kodelet's `kodelet feedback` CLI command
-  - Messages are appended to feedback queue
-  - Processed by Kodelet on next turn
+**Feedback** (via `kodelet feedback` CLI):
+- Messages are appended to feedback queue
+- Processed by Kodelet on next turn
 
 ## Configuration
 
-Currently the plugin works out-of-the-box with sensible defaults. Future versions may add configuration options for:
+The plugin works out-of-the-box with sensible defaults. Currently, no additional configuration is required.
 
+Future versions may add options for:
 - Debounce delay for context updates
-- Which diagnostics to include
+- Diagnostics filtering
 - Custom context filters
 
 ## Development
 
-For local development:
+**Local development setup:**
 
 ```lua
 {
@@ -163,7 +196,7 @@ For local development:
 }
 ```
 
-Quick reload during development:
+**Quick reload during development:**
 
 ```vim
 :lua package.loaded['kodelet'] = nil
@@ -190,10 +223,11 @@ cat ~/.kodelet/ide/context-*.json | jq .
 - Ensure Kodelet CLI is in PATH: `which kodelet`
 - Check conversation list works: `kodelet conversation list --json`
 - Verify context file exists after attaching
+- Check Neovim messages: `:messages`
 
 ## Contributing
 
-Contributions welcome! Please open issues or PRs on the [main Kodelet repository](https://github.com/jingkaihe/kodelet).
+Contributions welcome! Please open issues or PRs on the [kodelet.nvim repository](https://github.com/jingkaihe/kodelet.nvim).
 
 ## License
 
